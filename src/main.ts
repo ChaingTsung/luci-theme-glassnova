@@ -110,14 +110,9 @@ async function fetchJson(url: string): Promise<ApiBackground | null> {
 
 async function loadConfig(): Promise<ThemeConfig> {
   const inline = (window as unknown as { GlassNovaConfig?: Partial<Record<keyof ThemeConfig, unknown>> }).GlassNovaConfig || {};
-  let api: Partial<Record<keyof ThemeConfig, unknown>> = {};
-
-  try {
-    const res = await fetch('/cgi-bin/glassnova-config', { cache: 'no-store', credentials: 'same-origin' });
-    if (res.ok) api = await res.json();
-  } catch {
-    // Login page can still operate with defaults or inline config.
-  }
+  // nginx/uwsgi profile: the active UCI configuration is injected by header.ut.
+  // Avoid a custom /cgi-bin endpoint so the theme stays independent from uhttpd.
+  const api: Partial<Record<keyof ThemeConfig, unknown>> = {};
 
   let local: Partial<Record<keyof ThemeConfig, unknown>> = {};
   try {

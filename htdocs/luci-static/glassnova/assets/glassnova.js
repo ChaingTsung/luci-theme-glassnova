@@ -81,12 +81,7 @@
 
   async function loadConfig() {
     const inline = window.GlassNovaConfig || {};
-    let api = {};
-    try {
-      const res = await fetch('/cgi-bin/glassnova-config', { cache: 'no-store', credentials: 'same-origin' });
-      if (res.ok) api = await res.json();
-    } catch (_) {}
-
+    const api = {};
     let local = {};
     try {
       local = JSON.parse(localStorage.getItem('glassnova:override') || '{}');

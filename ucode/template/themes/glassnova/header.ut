@@ -1,11 +1,33 @@
 {#
   GlassNova theme for LuCI / OpenWrt 25.12+.
-  This template is intentionally small and CSS/JS-driven.
+  nginx/uwsgi profile: no custom CGI endpoint is required.
+  Runtime configuration is read from UCI and injected into window.GlassNovaConfig.
   For a full distribution theme, copy the current upstream bootstrap header.ut
   and keep the GlassNova asset includes below.
 -#}
 {% import { getuid, getspnam } from 'luci.core';
+   import { cursor } from 'uci';
    const boardinfo = ubus.call('system', 'board');
+   const uci = cursor();
+   const gn_get = (key, fallback) => uci.get('glassnova', 'main', key) ?? fallback;
+   const gn_config = {
+     media: media,
+     mode: gn_get('mode', 'auto'),
+     provider: gn_get('provider', 'local'),
+     local_url: gn_get('local_url', `${media}/media/default.svg`),
+     image_url: gn_get('image_url', ''),
+     video_url: gn_get('video_url', ''),
+     api_url: gn_get('api_url', ''),
+     unsplash_url: gn_get('unsplash_url', 'https://source.unsplash.com/featured/1920x1080/?abstract,network,router'),
+     pixiv_api: gn_get('pixiv_api', ''),
+     twitter_api: gn_get('twitter_api', ''),
+     selfhosted_api: gn_get('selfhosted_api', ''),
+     youtube_id: gn_get('youtube_id', ''),
+     glass_alpha: gn_get('glass_alpha', '0.56'),
+     glass_blur: gn_get('glass_blur', '22'),
+     title_alpha: gn_get('title_alpha', '0.42'),
+     reduce_motion: gn_get('reduce_motion', '0')
+   };
    http.prepare_content('text/html; charset=UTF-8');
 -%}
 <!DOCTYPE html>
@@ -24,10 +46,7 @@
     <style>{{ css }}</style>
   {% endif %}
   <script>
-    window.GlassNovaConfig = window.GlassNovaConfig || {
-      media: '{{ media }}',
-      local_url: '{{ media }}/media/default.svg'
-    };
+    window.GlassNovaConfig = {% printf("%J", gn_config); %};
   </script>
   <script type="module" defer src="{{ media }}/assets/glassnova.js"></script>
 </head>

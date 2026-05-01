@@ -1,7 +1,9 @@
 include $(TOPDIR)/rules.mk
 
-LUCI_TITLE:=GlassNova Theme
-LUCI_DEPENDS:=+luci-base +rpcd +uhttpd +libubox
+LUCI_TITLE:=GlassNova Theme for nginx/uwsgi
+# nginx deployment: do not select uhttpd and do not directly depend on luci-base.
+# The running LuCI stack should be provided by luci-nginx or luci-ssl-nginx.
+LUCI_DEPENDS:=+luci-compat +rpcd +libubox +uci +ucode-mod-uci +nginx +nginx-mod-luci +uwsgi-luci-support
 PKG_LICENSE:=Apache-2.0
 PKG_MAINTAINER:=GlassNova Maintainers
 
