@@ -245,6 +245,28 @@
     }
   }
 
+
+  function applyDaisyTheme(theme) {
+    var allowed = ['fantasy', 'winter', 'forest', 'sunset'];
+    if (allowed.indexOf(theme) < 0) theme = 'winter';
+    document.documentElement.setAttribute('data-theme', theme);
+    document.documentElement.dataset.gnTheme = (theme === 'forest' || theme === 'sunset') ? 'dark' : 'light';
+    localStorage.setItem('glassnova:theme', theme);
+  }
+
+  function installDaisyThemeSelect(config) {
+    if (qs('.gn-theme-select')) return;
+    var select = document.createElement('select');
+    select.className = 'gn-theme-select select select-bordered select-sm';
+    select.setAttribute('aria-label', '选择主题');
+    select.innerHTML = '<option value="winter">winter</option><option value="fantasy">fantasy</option><option value="forest">forest</option><option value="sunset">sunset</option>';
+    select.value = localStorage.getItem('glassnova:theme') || ((config && config.mode === 'dark') ? 'forest' : 'winter');
+    applyDaisyTheme(select.value);
+    select.addEventListener('change', function () {
+      applyDaisyTheme(select.value);
+    });
+    document.body.appendChild(select);
+  }
   function installThemeToggle(config) {
     var button = document.createElement('button');
     button.className = 'gn-theme-toggle';
@@ -369,7 +391,7 @@
         renderBackground(payload);
         enhanceLoginPage();
         installAuroraScene();
-        installThemeToggle(config);
+        installDaisyThemeSelect(config);
         bridgeLuCiMessages();
         bindTestToastButton();
       });
