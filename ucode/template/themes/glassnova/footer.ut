@@ -1,11 +1,12 @@
-    </main>
-    {% if (!blank_page): %}
-    <footer class="gn-footer">
-      Powered by <a href="https://github.com/openwrt/luci">{{ version.luciname }} ({{ version.luciversion }})</a>
-      / {{ version.distname }} {{ version.distversion }} ({{ version.distrevision }})
-      {% if (lua_active): %} / {{ _('Lua compatibility mode active') }}{% endif %}
-    </footer>
-    {% endif %}
+  {% if (!blank_page): %}
+   </div>
+   <footer class="gn-footer">
+    Powered by <a href="https://github.com/openwrt/luci">{{ version.luciname }} ({{ version.luciversion }})</a>
+    / {{ version.distname }} {{ version.distversion }} ({{ version.distrevision }})
+    {% if (lua_active): %} / {{ _('Lua compatibility mode active') }}{% endif %}
+   </footer>
+   <script type="text/javascript">L.require('menu-glassnova')</script>
   </div>
-</body>
+  {% endif %}
+ </body>
 </html>

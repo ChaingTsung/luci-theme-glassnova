@@ -129,3 +129,17 @@ The frontend accepts the following JSON shapes from self-hosted, Unsplash proxy,
 ```json
 { "type": "youtube", "id": "dQw4w9WgXcQ" }
 ```
+
+## Rescue / recovery
+
+If a broken theme prevents LuCI from rendering, SSH into the router and switch back to Bootstrap:
+
+```sh
+uci set luci.main.mediaurlbase='/luci-static/bootstrap'
+uci commit luci
+rm -rf /tmp/luci-*
+/etc/init.d/nginx restart 2>/dev/null || true
+/etc/init.d/uhttpd restart 2>/dev/null || true
+```
+
+For nginx + uwsgi deployments, restarting nginx is normally enough after clearing `/tmp/luci-*`.

@@ -1,88 +1,90 @@
 {#
   GlassNova theme for LuCI / OpenWrt 25.12+.
-  nginx/uwsgi profile: no custom CGI endpoint is required.
-  Runtime configuration is read from UCI and injected into window.GlassNovaConfig.
-  For a full distribution theme, copy the current upstream bootstrap header.ut
-  and keep the GlassNova asset includes below.
+  This header intentionally follows the upstream bootstrap ucode template shape
+  to stay compatible with LuCI's dispatcher, translations, cbi.js and menu loader.
 -#}
-{% import { getuid, getspnam } from 'luci.core';
-   import { cursor } from 'uci';
-   const boardinfo = ubus.call('system', 'board');
-   const uci = cursor();
-   const gn_get = (key, fallback) => uci.get('glassnova', 'main', key) ?? fallback;
-   const gn_config = {
-     media: media,
-     mode: gn_get('mode', 'auto'),
-     provider: gn_get('provider', 'local'),
-     local_url: gn_get('local_url', `${media}/media/default.svg`),
-     image_url: gn_get('image_url', ''),
-     video_url: gn_get('video_url', ''),
-     api_url: gn_get('api_url', ''),
-     unsplash_url: gn_get('unsplash_url', 'https://source.unsplash.com/featured/1920x1080/?abstract,network,router'),
-     pixiv_api: gn_get('pixiv_api', ''),
-     twitter_api: gn_get('twitter_api', ''),
-     selfhosted_api: gn_get('selfhosted_api', ''),
-     youtube_id: gn_get('youtube_id', ''),
-     glass_alpha: gn_get('glass_alpha', '0.56'),
-     glass_blur: gn_get('glass_blur', '22'),
-     title_alpha: gn_get('title_alpha', '0.42'),
-     reduce_motion: gn_get('reduce_motion', '0')
-   };
-   http.prepare_content('text/html; charset=UTF-8');
+{%
+ import { getuid, getspnam } from 'luci.core';
+ const boardinfo = ubus.call('system', 'board') || {};
+ http.prepare_content('text/html; charset=UTF-8');
 -%}
 <!DOCTYPE html>
-<html lang="{{ luci.i18n.context.lang || 'en' }}" data-gn-theme="auto">
-<head>
+<html lang="{{ dispatcher.lang }}" data-gn-theme="auto">
+ <head>
   <meta charset="utf-8">
+  <title>{{ striptags(`${boardinfo.hostname ?? '?'}${dispatched?.title ? ` | ${_(dispatched.title)}` : ''}`) }}</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="color-scheme" content="light dark">
-  <title>{{ striptags(`${boardinfo.hostname ?? '?'}${dispatched?.title ? ` | ${_(dispatched.title)}` : ''}`) }}</title>
+  <meta name="darkreader-lock">
   <link rel="icon" href="{{ media }}/logo.svg" sizes="any">
   <link rel="stylesheet" href="{{ media }}/assets/glassnova.css">
   {% if (node?.css): %}
-    <link rel="stylesheet" href="{{ resource }}/{{ node.css }}">
+  <link rel="stylesheet" href="{{ resource }}/{{ node.css }}">
   {% endif %}
   {% if (css): %}
-    <style>{{ css }}</style>
+  <style title="text/css">{{ css }}</style>
   {% endif %}
+  <script src="{{ dispatcher.build_url('admin/translations', dispatcher.lang) }}"></script>
+  <script src="{{ resource }}/cbi.js"></script>
   <script>
-    window.GlassNovaConfig = {% printf("%J", gn_config); %};
+    window.GlassNovaConfig = {
+      media: "{{ media }}",
+      mode: "auto",
+      provider: "local",
+      local_url: "{{ media }}/media/default.svg",
+      image_url: "",
+      video_url: "",
+      api_url: "",
+      unsplash_url: "https://source.unsplash.com/featured/1920x1080/?abstract,network,router",
+      pixiv_api: "",
+      twitter_api: "",
+      selfhosted_api: "",
+      youtube_id: "",
+      glass_alpha: "0.56",
+      glass_blur: "22",
+      title_alpha: "0.42",
+      reduce_motion: "0"
+    };
   </script>
   <script type="module" defer src="{{ media }}/assets/glassnova.js"></script>
-</head>
-<body class="gn-body">
+ </head>
+ <body class="gn-body lang_{{ dispatcher.lang }} {{ entityencode(striptags(node?.title ?? ''), true) }}" data-page="{{ entityencode(join('-', ctx.request_path), true) }}">
   <div class="gn-background" aria-hidden="true"><div class="gn-background__media"></div></div>
+  {% if (!blank_page): %}
   <div class="gn-shell">
-    {% if (!blank_page): %}
-    <header class="gn-topbar">
-      <a class="gn-brand" href="{{ dispatcher.build_url('admin/status/overview') }}">
-        <span class="gn-brand__mark">◆</span>
-        <span>{{ striptags(boardinfo.hostname ?? '?') }}</span>
-      </a>
-    </header>
+   <header class="gn-topbar">
+    <a class="brand gn-brand" href="/">
+     <span class="gn-brand__mark">◆</span>
+     <span>{{ striptags(boardinfo.hostname ?? '?') }}</span>
+    </a>
+    <ul class="nav gn-mode-menu" id="modemenu" style="display:none"></ul>
+    <ul class="nav gn-main-menu" id="topmenu" style="display:none"></ul>
+    <div id="indicators" class="pull-right"></div>
+   </header>
+   <div id="maincontent" class="container gn-main">
+    {% if (getuid() == 0 && getspnam('root')?.pwdp === ''): %}
+    <div class="alert-message warning">
+     <h4>{{ _('No password set!') }}</h4>
+     <p>{{ _('There is no password set on this router. Please configure a root password to protect the web interface.') }}</p>
+     {% if (dispatcher.lookup("admin/system/admin")): %}
+     <div class="right"><a class="btn" href="{{ dispatcher.build_url("admin/system/admin") }}">{{ _('Go to password configuration...') }}</a></div>
+     {% endif %}
+    </div>
     {% endif %}
-    <main class="gn-main" id="maincontent">
-      {% if (getuid() == 0 && getspnam('root')?.pwdp === '' && ctx.authsession): %}
-      <div class="alert-message warning">
-        <h4>{{ _('No password set!') }}</h4>
-        <p>{{ _('There is no password set on this router. Please configure a root password to protect the web interface.') }}</p>
-        {% if (dispatcher.lookup('admin/system/admin')): %}
-          <p><a href="{{ dispatcher.build_url('admin/system/admin') }}">{{ _('Go to password configuration...') }}</a></p>
-        {% endif %}
-      </div>
-      {% endif %}
-      {% if (boardinfo?.rootfs_type == 'initramfs'): %}
-      <div class="alert-message warning">
-        <h4>{{ _('System running in recovery (initramfs) mode.') }}</h4>
-        <p>{{ _('No changes to settings will be stored and are lost after rebooting. This mode should only be used to install a firmware upgrade') }}</p>
-        {% if (dispatcher.lookup('admin/system/flash')): %}
-          <p><a href="{{ dispatcher.build_url('admin/system/flash') }}">{{ _('Go to firmware upgrade...') }}</a></p>
-        {% endif %}
-      </div>
-      {% endif %}
-      <noscript>
-        <div class="alert-message warning">
-          <h4>{{ _('JavaScript required!') }}</h4>
-          <p>{{ _('You must enable JavaScript in your browser or LuCI will not work properly.') }}</p>
-        </div>
-      </noscript>
+    {% if (boardinfo.rootfs_type == "initramfs"): %}
+    <div class="alert-message warning">
+     <h4>{{ _('System running in recovery (initramfs) mode.') }}</h4>
+     <p>{{ _('No changes to settings will be stored and are lost after rebooting. This mode should only be used to install a firmware upgrade') }}</p>
+     {% if (dispatcher.lookup("admin/system/flash")): %}
+     <div class="right"><a class="btn" href="{{ dispatcher.build_url("admin/system/flash") }}">{{ _('Go to firmware upgrade...') }}</a></div>
+     {% endif %}
+    </div>
+    {% endif %}
+    <noscript>
+     <div class="alert-message warning">
+      <h4>{{ _('JavaScript required!') }}</h4>
+      <p>{{ _('You must enable JavaScript in your browser or LuCI will not work properly.') }}</p>
+     </div>
+    </noscript>
+    <div id="tabmenu" style="display:none"></div>
+  {% endif %}

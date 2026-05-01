@@ -137,6 +137,107 @@
     box-shadow: 0 12px 32px rgb(var(--gn-accent-rgb) / .34);
   }
 
+
+  .gn-topbar .nav {
+    display: flex;
+    align-items: center;
+    gap: .35rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .gn-topbar .nav > li {
+    position: relative;
+  }
+
+  .gn-topbar .nav a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.3rem;
+    padding: .45rem .75rem;
+    border-radius: 999px;
+    color: rgb(var(--gn-text-rgb));
+    text-decoration: none;
+    white-space: nowrap;
+    transition: background .18s ease, transform .18s ease;
+  }
+
+  .gn-topbar .nav > li.active > a,
+  .gn-topbar .nav a:hover {
+    background: rgb(var(--gn-surface-rgb) / .58);
+    transform: translateY(-1px);
+  }
+
+  .gn-mode-menu {
+    margin-left: auto !important;
+  }
+
+  .gn-main-menu {
+    flex-wrap: wrap;
+  }
+
+  .gn-dropdown-menu {
+    position: absolute;
+    top: calc(100% + .45rem);
+    left: 0;
+    z-index: 80;
+    min-width: 12rem;
+    display: none !important;
+    padding: .45rem !important;
+    border: 1px solid rgb(var(--gn-border-rgb) / .28);
+    border-radius: 1rem;
+    background: rgb(var(--gn-surface-rgb) / .82);
+    box-shadow: 0 18px 50px rgb(15 23 42 / .18);
+    backdrop-filter: blur(18px) saturate(1.35);
+    -webkit-backdrop-filter: blur(18px) saturate(1.35);
+    list-style: none;
+  }
+
+  .gn-topbar .dropdown:hover > .gn-dropdown-menu,
+  .gn-topbar .dropdown:focus-within > .gn-dropdown-menu {
+    display: block !important;
+  }
+
+  #tabmenu {
+    margin: 0 0 1rem;
+  }
+
+  #tabmenu .tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .45rem;
+    margin: 0;
+    padding: .35rem;
+    list-style: none;
+    border: 1px solid rgb(var(--gn-border-rgb) / .22);
+    border-radius: 1rem;
+    background: rgb(var(--gn-surface-rgb) / .38);
+    backdrop-filter: blur(14px) saturate(1.25);
+  }
+
+  #tabmenu .tabs a {
+    display: inline-flex;
+    padding: .48rem .75rem;
+    border-radius: .8rem;
+    color: rgb(var(--gn-text-rgb));
+    text-decoration: none;
+  }
+
+  #tabmenu .tabs li.active a,
+  #tabmenu .tabs a:hover {
+    background: rgb(var(--gn-surface-rgb) / .7);
+  }
+
+  #maincontent.container {
+    box-sizing: border-box;
+  }
+
+  .cbi-map, .cbi-section, .table, .modal, .ifacebox, .network-status-table {
+    border-radius: 1.25rem;
+  }
+
+
   .gn-main {
     width: min(1180px, calc(100% - 2rem));
     margin-inline: auto;
