@@ -922,3 +922,17 @@ body.gn-login .gn-runway-wrap button {
     max-height: 62vh;
   }
 }
+
+/* GlassNova 2.2 hotfix mirrors the packaged CSS: login form wraps actions, top menus use click dropdowns. */
+body.gn-login form.gn-auth-form.gn-login-card { display:block!important; box-sizing:border-box!important; width:min(100%,480px)!important; margin:0 auto!important; }
+body.gn-login .gn-auth-form .gn-login-clean, body.gn-login .gn-auth-form .cbi-map, body.gn-login .gn-auth-form .cbi-section, body.gn-login .gn-auth-form fieldset, body.gn-login .gn-auth-form .cbi-section-node { border:0!important; background:transparent!important; box-shadow:none!important; backdrop-filter:none!important; -webkit-backdrop-filter:none!important; padding:0!important; margin:0!important; min-width:0!important; }
+body.gn-login .gn-auth-form .cbi-page-actions, body.gn-login .gn-auth-form .right { display:flex!important; justify-content:flex-start!important; align-items:center!important; width:100%!important; margin:1rem 0 0!important; padding:0!important; clear:both!important; }
+body.gn-login .gn-runway-wrap { margin-top:0!important; }
+.gn-topbar .nav a, .gn-topbar .nav button.gn-menu-toggle { appearance:none!important; display:inline-flex!important; align-items:center!important; justify-content:center!important; min-width:auto!important; min-height:2.5rem!important; padding:.55rem .9rem!important; border:1px solid transparent!important; border-radius:999px!important; background:transparent!important; color:rgb(var(--gn-text-rgb))!important; box-shadow:none!important; font-weight:650!important; line-height:1!important; white-space:nowrap!important; text-indent:0!important; opacity:1!important; }
+.gn-topbar .nav>li.active>a, .gn-topbar .nav>li.active>button.gn-menu-toggle, .gn-topbar .nav a:hover, .gn-topbar .nav button.gn-menu-toggle:hover, .gn-topbar .dropdown.open>button.gn-menu-toggle { background:rgb(255 255 255 / .78)!important; border-color:rgb(var(--gn-border-rgb) / .52)!important; color:rgb(var(--gn-text-rgb))!important; box-shadow:0 10px 24px rgb(15 23 42 / .08)!important; filter:none!important; transform:none!important; }
+.gn-dropdown-menu { position:fixed!important; z-index:2000!important; display:none!important; grid-template-columns:repeat(auto-fit,minmax(10.5rem,1fr))!important; gap:.28rem!important; width:auto!important; min-width:min(35rem,calc(100vw - 1.25rem))!important; max-width:calc(100vw - 1.25rem)!important; max-height:calc(100vh - 6rem)!important; overflow:auto!important; overscroll-behavior:contain!important; padding:.55rem!important; background:rgb(var(--gn-surface-rgb) / .96)!important; color:rgb(var(--gn-text-rgb))!important; }
+.gn-topbar .dropdown:not(.open):hover>.gn-dropdown-menu, .gn-topbar .dropdown:not(.open):focus-within>.gn-dropdown-menu { display:none!important; }
+.gn-topbar .dropdown.open>.gn-dropdown-menu { display:grid!important; }
+.gn-dropdown-menu a, .gn-dropdown-menu button { color:rgb(var(--gn-text-rgb))!important; background:transparent!important; box-shadow:none!important; filter:none!important; transform:none!important; }
+.gn-dropdown-menu a:hover { background:rgb(var(--gn-accent-rgb) / .10)!important; }
+@media (max-width:700px){ body.gn-login #maincontent{max-width:min(92vw,440px)!important;} body.gn-login form.gn-auth-form.gn-login-card{padding:1.25rem!important;} .gn-dropdown-menu{grid-template-columns:1fr!important; min-width:calc(100vw - 1rem)!important; max-width:calc(100vw - 1rem)!important;} }

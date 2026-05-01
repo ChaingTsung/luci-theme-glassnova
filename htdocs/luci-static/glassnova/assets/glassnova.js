@@ -206,11 +206,17 @@
     });
 
     var form = qs('form', main);
-    if (form) form.classList.add('gn-auth-form');
-
-    var card = qs('#login', main) || qs('.login-form', main) || qs('.cbi-map', main) || form;
+    var card = form || qs('#login', main) || qs('.login-form', main) || qs('.cbi-map', main);
     if (!card) return;
+
+    card.classList.add('gn-auth-form');
     card.classList.add('gn-login-card');
+
+    if (form) {
+      qsa('.cbi-map, .cbi-section, fieldset, .cbi-section-node', form).forEach(function (el) {
+        el.classList.add('gn-login-clean');
+      });
+    }
 
     var submit = qs('input[type="submit"], button[type="submit"]', card);
     if (submit && !submit.closest('.gn-runway-wrap')) {

@@ -24,11 +24,52 @@ return baseclass.extend({
 				this.renderTabMenu(node, url);
 		}
 
-		document.addEventListener('click', (ev) => {
-			if (!(ev.target instanceof Element) || ev.target.closest('.dropdown'))
+		this.installGlobalMenuHandlers();
+	},
+
+	installGlobalMenuHandlers() {
+		if (document.body.dataset.gnMenuHandlers === '1')
+			return;
+
+		document.body.dataset.gnMenuHandlers = '1';
+
+		document.addEventListener('click', ev => {
+			if (!(ev.target instanceof Element) || ev.target.closest('.gn-topbar .dropdown'))
 				return;
-			document.querySelectorAll('.gn-topbar .dropdown.open').forEach(el => el.classList.remove('open'));
+			this.closeOpenMenus();
 		});
+
+		window.addEventListener('resize', () => this.closeOpenMenus(), { passive: true });
+		window.addEventListener('scroll', () => this.closeOpenMenus(), { passive: true });
+	},
+
+	closeOpenMenus() {
+		document.querySelectorAll('.gn-topbar .dropdown.open').forEach(el => {
+			el.classList.remove('open');
+			const menu = el.querySelector('.gn-dropdown-menu');
+			if (menu) {
+				menu.style.left = '';
+				menu.style.top = '';
+				menu.style.maxHeight = '';
+				menu.style.minWidth = '';
+			}
+		});
+	},
+
+	placeDropdown(toggle, menu) {
+		const rect = toggle.getBoundingClientRect();
+		const margin = 10;
+		const vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
+		const vh = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0);
+		const width = Math.min(560, vw - margin * 2);
+		const left = Math.max(margin, Math.min(rect.left, vw - width - margin));
+		const top = Math.min(rect.bottom + 8, vh - margin);
+		const maxHeight = Math.max(220, vh - top - margin);
+
+		menu.style.left = left + 'px';
+		menu.style.top = top + 'px';
+		menu.style.minWidth = width + 'px';
+		menu.style.maxHeight = maxHeight + 'px';
 	},
 
 	renderTabMenu(tree, url, level) {
@@ -79,16 +120,22 @@ return baseclass.extend({
 			const li = E('li', { 'class': (!level && hasSubmenu) ? 'dropdown' : '' });
 
 			if (!level && hasSubmenu) {
-				const toggle = E('button', { 'class': 'gn-menu-toggle', 'type': 'button' }, [ _(child.title) ]);
-				toggle.addEventListener('click', (ev) => {
+				const toggle = E('button', { 'class': 'gn-menu-toggle', 'type': 'button', 'aria-expanded': 'false' }, [ _(child.title) ]);
+
+				toggle.addEventListener('click', ev => {
 					ev.preventDefault();
 					ev.stopPropagation();
-					document.querySelectorAll('.gn-topbar .dropdown.open').forEach(el => {
-						if (el !== li)
-							el.classList.remove('open');
-					});
-					li.classList.toggle('open');
+
+					const isOpen = li.classList.contains('open');
+					this.closeOpenMenus();
+
+					if (!isOpen) {
+						li.classList.add('open');
+						toggle.setAttribute('aria-expanded', 'true');
+						this.placeDropdown(toggle, submenu);
+					}
 				});
+
 				li.appendChild(toggle);
 				li.appendChild(submenu);
 			}
