@@ -1,145 +1,131 @@
 # luci-theme-glassnova
 
-GlassNova is a modern glassmorphism LuCI theme prototype for OpenWrt 25.12+.
-This variant targets **nginx + uwsgi LuCI** deployments and intentionally does **not** depend on `uhttpd` or directly select `luci-base`.
+GlassNova is a modern LuCI theme for OpenWrt 25.12+ style LuCI ucode templates. It is built as a static asset package with Vite 7, Tailwind CSS v4 and pnpm.
 
-## Runtime profile
+## Important packaging note
 
-- Web server: `nginx` / `nginx-ssl` with LuCI served through `uwsgi`.
-- LuCI compatibility: package dependency uses `luci-compat`.
-- No custom `/www/cgi-bin/*` endpoint is used. The active UCI configuration is read in `header.ut` through the ucode `uci` module and injected into `window.GlassNovaConfig`.
-- For complete LuCI-on-nginx setup, install/use `luci-nginx` or `luci-ssl-nginx` in your image, then select this theme.
+This archive is the **portable OpenWrt package variant**. It is intended to be copied directly into:
 
-## Features
+```sh
+package/luci-theme-glassnova
+```
 
-- Vite 7 + Tailwind CSS v4 + pnpm static asset pipeline.
-- Light, dark and browser-following modes with a floating toggle.
-- Centered responsive login panel.
-- Configurable glass opacity, blur radius and frosted title opacity.
-- Login background providers: local image/GIF/video, direct remote image/GIF, direct remote video, generic JSON API, Unsplash URL, Pixiv proxy API, X/Twitter proxy API, self-hosted API and YouTube video ID.
-- Floating stacked notifications in the top-right corner with spring-style animation.
+The default `Makefile` uses the normal OpenWrt `package.mk` interface, so it can be discovered by `make menuconfig` without relying on the relative `../../luci.mk` path used inside the LuCI feed.
 
-## Build static assets
+A LuCI-feed Makefile is still provided as `Makefile.luci-feed`. Use it only when placing the package under:
+
+```sh
+feeds/luci/themes/luci-theme-glassnova
+```
+
+## nginx / uwsgi profile
+
+The theme package is web-server neutral:
+
+- it does **not** depend on `uhttpd`
+- it does **not** directly depend on `luci-base`
+- it directly depends on `luci-compat`, `rpcd` and `ucode-mod-uci`
+
+For nginx LuCI runtime, install/select the nginx LuCI stack separately, for example `luci-nginx` or the equivalent packages for your tree: `nginx`, `nginx-mod-luci`, `uwsgi-luci-support`.
+
+> LuCI itself normally requires its core runtime in the final image. This package avoids a direct `+luci-base` dependency as requested, but your selected LuCI collection/runtime may still pull core LuCI packages transitively.
+
+## Install into OpenWrt source tree
+
+Recommended direct package mode:
+
+```sh
+unzip luci-theme-glassnova-openwrt-selectable.zip
+cd luci-theme-glassnova
+./scripts/install-into-openwrt-package.sh /path/to/openwrt
+cd /path/to/openwrt
+rm -rf tmp
+make defconfig
+make menuconfig
+```
+
+Menu path:
+
+```text
+LuCI -> 4. Themes -> luci-theme-glassnova
+```
+
+Build only this package:
+
+```sh
+make package/luci-theme-glassnova/compile V=s
+```
+
+## Alternative: install into the LuCI feed
+
+```sh
+unzip luci-theme-glassnova-openwrt-selectable.zip
+cd luci-theme-glassnova
+./scripts/install-into-luci-feed.sh /path/to/openwrt
+cd /path/to/openwrt
+./scripts/feeds update luci
+./scripts/feeds install luci-theme-glassnova
+rm -rf tmp
+make defconfig
+make menuconfig
+```
+
+## If it still does not appear
+
+Run these checks from the OpenWrt root:
+
+```sh
+find package feeds -path '*/luci-theme-glassnova/Makefile' -print
+make package/luci-theme-glassnova/{clean,compile} V=s
+./scripts/feeds search luci-theme-glassnova || true
+grep -R "luci-theme-glassnova" tmp/.config-package.in tmp/info/.packageinfo 2>/dev/null || true
+```
+
+Common causes:
+
+1. Package was placed under `package/luci-theme-glassnova/luci-theme-glassnova` due to an extra nested directory.
+2. Old `tmp/` metadata was not regenerated.
+3. Using the LuCI-feed `../../luci.mk` Makefile outside `feeds/luci/themes`.
+4. The tree does not have `luci-compat`; update/install the LuCI feed first.
+5. Custom forks rename the LuCI category or omit the LuCI feed entirely.
+
+## Runtime theme switch
+
+After installing the IPK:
+
+```sh
+uci set luci.main.mediaurlbase='/luci-static/glassnova'
+uci commit luci
+/etc/init.d/nginx reload 2>/dev/null || true
+/etc/init.d/uwsgi reload 2>/dev/null || true
+```
+
+## Frontend development
 
 ```sh
 pnpm install
 pnpm build
 ```
 
-The bundle is emitted as:
+The Vite build writes deterministic LuCI asset names:
 
 ```text
 htdocs/luci-static/glassnova/assets/glassnova.css
 htdocs/luci-static/glassnova/assets/glassnova.js
 ```
 
-The fixed filenames are intentional because LuCI theme templates reference static assets through `{{ media }}`.
+## Background media API
 
-## Add to OpenWrt buildroot
-
-```sh
-cp -R luci-theme-glassnova feeds/luci/themes/
-./scripts/feeds update luci
-./scripts/feeds install luci-theme-glassnova
-make menuconfig
-# LuCI -> Themes -> luci-theme-glassnova
-make package/feeds/luci/luci-theme-glassnova/compile V=s
-```
-
-## Recommended image profile for nginx
-
-Use either `luci-nginx` or `luci-ssl-nginx` as the LuCI collection, then add this theme:
-
-```text
-+luci-nginx
-+luci-compat
-+luci-theme-glassnova
-```
-
-or HTTPS-first:
-
-```text
-+luci-ssl-nginx
-+luci-compat
-+luci-theme-glassnova
-```
-
-This package's Makefile also depends on `nginx`, `nginx-mod-luci` and `uwsgi-luci-support` so a standalone install does not pull in `uhttpd`.
-
-## Switch theme
-
-```sh
-uci set luci.themes.GlassNova='/luci-static/glassnova'
-uci set luci.main.mediaurlbase='/luci-static/glassnova'
-uci commit luci
-/etc/init.d/nginx reload
-/etc/init.d/uwsgi reload 2>/dev/null || true
-```
-
-## Background API contract
-
-A generic API can return a plain URL string:
+The frontend accepts the following JSON shapes from self-hosted, Unsplash proxy, Pixiv proxy, X/Twitter proxy or any other API endpoint:
 
 ```json
-"https://example.com/wallpaper.webp"
+{ "type": "image", "url": "https://example.com/bg.jpg" }
 ```
-
-or an object:
 
 ```json
-{
-  "type": "image",
-  "url": "https://example.com/wallpaper.webp"
-}
+{ "type": "video", "url": "https://example.com/bg.mp4", "poster": "https://example.com/poster.jpg" }
 ```
-
-Supported `type` values:
-
-- `image`
-- `gif`
-- `video`
-- `youtube`
-
-Video example:
 
 ```json
-{
-  "type": "video",
-  "url": "https://example.com/bg.webm",
-  "poster": "https://example.com/poster.webp"
-}
+{ "type": "youtube", "id": "dQw4w9WgXcQ" }
 ```
-
-YouTube example:
-
-```json
-{
-  "type": "youtube",
-  "id": "dQw4w9WgXcQ"
-}
-```
-
-For Pixiv and X/Twitter, use a proxy API. Do not put service credentials into browser-visible URLs.
-
-## UCI config
-
-```uci
-config theme 'main'
-        option mode 'auto'
-        option provider 'local'
-        option local_url '/luci-static/glassnova/media/default.svg'
-        option glass_alpha '0.56'
-        option glass_blur '22'
-        option title_alpha '0.42'
-        option reduce_motion '0'
-```
-
-The LuCI settings page is available at:
-
-```text
-System -> GlassNova Theme
-```
-
-## Notes
-
-This is a functional prototype. For a production distribution theme, merge the current upstream `luci-theme-bootstrap` `header.ut` and `footer.ut` from the exact LuCI branch you ship, then retain the GlassNova CSS/JS injection and UCI config block.
