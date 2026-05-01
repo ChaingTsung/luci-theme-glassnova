@@ -143,3 +143,8 @@ rm -rf /tmp/luci-*
 ```
 
 For nginx + uwsgi deployments, restarting nginx is normally enough after clearing `/tmp/luci-*`.
+
+
+## 2.1 visual reference update
+
+This version adds a tasteful cyber-glass login scene inspired by marquee border login buttons and transparent-blur login panels, without bundling jQuery/Layui or copying external assets. It also suppresses root-password warnings on the login screen and improves long plugin dropdowns with scrolling and responsive grid layout.

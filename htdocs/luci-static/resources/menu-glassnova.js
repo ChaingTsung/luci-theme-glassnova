@@ -23,6 +23,12 @@ return baseclass.extend({
 			if (node)
 				this.renderTabMenu(node, url);
 		}
+
+		document.addEventListener('click', (ev) => {
+			if (!(ev.target instanceof Element) || ev.target.closest('.dropdown'))
+				return;
+			document.querySelectorAll('.gn-topbar .dropdown.open').forEach(el => el.classList.remove('open'));
+		});
 	},
 
 	renderTabMenu(tree, url, level) {
@@ -70,14 +76,29 @@ return baseclass.extend({
 		children.forEach(child => {
 			const submenu = this.renderMainMenu(child, url + '/' + child.name, (level || 0) + 1);
 			const hasSubmenu = !!submenu.firstElementChild;
-			const subclass = (!level && hasSubmenu) ? 'dropdown' : '';
-			const linkclass = (!level && hasSubmenu) ? 'menu' : '';
-			const linkurl = hasSubmenu ? '#' : L.url(url, child.name);
+			const li = E('li', { 'class': (!level && hasSubmenu) ? 'dropdown' : '' });
 
-			ul.appendChild(E('li', { 'class': subclass }, [
-				E('a', { 'class': linkclass, 'href': linkurl }, [ _(child.title) ]),
-				submenu
-			]));
+			if (!level && hasSubmenu) {
+				const toggle = E('button', { 'class': 'gn-menu-toggle', 'type': 'button' }, [ _(child.title) ]);
+				toggle.addEventListener('click', (ev) => {
+					ev.preventDefault();
+					ev.stopPropagation();
+					document.querySelectorAll('.gn-topbar .dropdown.open').forEach(el => {
+						if (el !== li)
+							el.classList.remove('open');
+					});
+					li.classList.toggle('open');
+				});
+				li.appendChild(toggle);
+				li.appendChild(submenu);
+			}
+			else {
+				li.appendChild(E('a', { 'href': hasSubmenu ? '#' : L.url(url, child.name) }, [ _(child.title) ]));
+				if (hasSubmenu)
+					li.appendChild(submenu);
+			}
+
+			ul.appendChild(li);
 		});
 
 		ul.style.display = '';
