@@ -1,0 +1,13 @@
+{
+  "admin/system/glassnova": {
+    "title": "GlassNova Theme",
+    "order": 90,
+    "action": {
+      "type": "view",
+      "path": "glassnova/settings"
+    },
+    "depends": {
+      "acl": [ "luci-theme-glassnova" ]
+    }
+  }
+}

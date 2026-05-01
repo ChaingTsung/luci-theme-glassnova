@@ -1,0 +1,6 @@
+#!/bin/sh
+[ -n "${IPKG_INSTROOT}" ] || {
+	uci -q delete luci.themes.GlassNova
+	uci -q commit luci
+}
+exit 0

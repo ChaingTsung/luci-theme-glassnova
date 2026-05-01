@@ -1,0 +1,11 @@
+{
+  "luci-theme-glassnova": {
+    "description": "Grant access to GlassNova theme configuration",
+    "read": {
+      "uci": [ "glassnova" ]
+    },
+    "write": {
+      "uci": [ "glassnova" ]
+    }
+  }
+}

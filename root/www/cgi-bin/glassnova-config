@@ -1,0 +1,27 @@
+#!/bin/sh
+printf 'Content-Type: application/json\r\nCache-Control: no-store\r\n\r\n'
+
+. /usr/share/libubox/jshn.sh
+
+uci_get() {
+	uci -q get "glassnova.main.$1" 2>/dev/null || printf '%s' "$2"
+}
+
+json_init
+json_add_string mode "$(uci_get mode auto)"
+json_add_string provider "$(uci_get provider local)"
+json_add_string local_url "$(uci_get local_url /luci-static/glassnova/media/default.svg)"
+json_add_string image_url "$(uci_get image_url '')"
+json_add_string video_url "$(uci_get video_url '')"
+json_add_string api_url "$(uci_get api_url '')"
+json_add_string unsplash_url "$(uci_get unsplash_url 'https://source.unsplash.com/featured/1920x1080/?abstract,network,router')"
+json_add_string pixiv_api "$(uci_get pixiv_api '')"
+json_add_string twitter_api "$(uci_get twitter_api '')"
+json_add_string selfhosted_api "$(uci_get selfhosted_api '')"
+json_add_string youtube_id "$(uci_get youtube_id '')"
+json_add_string glass_alpha "$(uci_get glass_alpha 0.56)"
+json_add_string glass_blur "$(uci_get glass_blur 22)"
+json_add_string title_alpha "$(uci_get title_alpha 0.42)"
+json_add_string reduce_motion "$(uci_get reduce_motion 0)"
+json_dump
+exit 0

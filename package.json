@@ -1,0 +1,19 @@
+{
+  "name": "luci-theme-glassnova",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Modern glassmorphism LuCI theme assets for OpenWrt 25.12+",
+  "type": "module",
+  "scripts": {
+    "dev": "vite build --watch --mode development",
+    "build": "vite build",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.1.0",
+    "tailwindcss": "^4.1.0",
+    "typescript": "^5.8.0",
+    "vite": "^7.0.0"
+  },
+  "packageManager": "pnpm@10.0.0"
+}
