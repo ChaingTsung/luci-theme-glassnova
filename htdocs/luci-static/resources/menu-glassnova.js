@@ -34,13 +34,17 @@ return baseclass.extend({
 		document.body.dataset.gnMenuHandlers = '1';
 
 		document.addEventListener('click', ev => {
-			if (!(ev.target instanceof Element) || ev.target.closest('.gn-topbar .dropdown'))
+			if (ev.target instanceof Element && ev.target.closest('.gn-topbar .dropdown, .gn-dropdown-menu'))
 				return;
 			this.closeOpenMenus();
+		}, true);
+
+		document.addEventListener('keydown', ev => {
+			if (ev.key === 'Escape')
+				this.closeOpenMenus();
 		});
 
-		window.addEventListener('resize', () => this.closeOpenMenus(), { passive: true });
-		window.addEventListener('scroll', () => this.closeOpenMenus(), { passive: true });
+		window.addEventListener('resize', () => this.repositionOpenMenus(), { passive: true });
 	},
 
 	closeOpenMenus() {
@@ -55,22 +59,34 @@ return baseclass.extend({
 				menu.style.top = '';
 				menu.style.maxHeight = '';
 				menu.style.minWidth = '';
+				menu.style.width = '';
 			}
+		});
+	},
+
+	repositionOpenMenus() {
+		document.querySelectorAll('.gn-topbar .dropdown.open').forEach(el => {
+			const toggle = el.querySelector('.gn-menu-toggle');
+			const menu = el.querySelector('.gn-dropdown-menu');
+			if (toggle && menu)
+				this.placeDropdown(toggle, menu);
 		});
 	},
 
 	placeDropdown(toggle, menu) {
 		const rect = toggle.getBoundingClientRect();
-		const margin = 10;
+		const margin = 12;
 		const vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
 		const vh = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0);
-		const width = Math.min(360, vw - margin * 2);
-		const left = Math.max(margin, Math.min(rect.left, vw - width - margin));
-		const top = Math.min(rect.bottom + 8, vh - margin);
+		const isMobile = vw <= 760;
+		const width = isMobile ? (vw - margin * 2) : Math.min(420, vw - margin * 2);
+		const left = isMobile ? margin : Math.max(margin, Math.min(rect.left, vw - width - margin));
+		const top = Math.min(rect.bottom + 10, vh - margin - 220);
 		const maxHeight = Math.max(220, vh - top - margin);
 
 		menu.style.left = left + 'px';
 		menu.style.top = top + 'px';
+		menu.style.width = width + 'px';
 		menu.style.minWidth = width + 'px';
 		menu.style.maxHeight = maxHeight + 'px';
 	},
@@ -92,8 +108,10 @@ return baseclass.extend({
 			paths = ['M4 19V5', 'M8 17v-5', 'M12 17V7', 'M16 17v-9', 'M20 17v-3'];
 		else if (n.indexOf('service') >= 0)
 			paths = ['M4 7h16', 'M4 12h16', 'M4 17h16', 'M7 7v10'];
+		else if (n.indexOf('vpn') >= 0)
+			paths = ['M12 3l7 4v5c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V7l7-4Z', 'M9.5 12.5l1.7 1.7 3.8-4'];
 		else
-			paths = ['M3 12h18', 'M12 3v18', 'M5 5l14 14'];
+			paths = ['M4 6h16', 'M4 12h16', 'M4 18h16'];
 
 		paths.forEach(d => {
 			const p = document.createElementNS(ns, 'path');
@@ -114,12 +132,9 @@ return baseclass.extend({
 
 		children.forEach(child => {
 			const isActive = (L.env.dispatchpath[3 + (level || 0)] == child.name);
-			const className = 'tabmenu-item-%s%s'.format(child.name, isActive ? ' active' : '');
-
-			ul.appendChild(E('li', { 'class': className }, [
+			ul.appendChild(E('li', { 'class': 'tabmenu-item-%s%s'.format(child.name, isActive ? ' active' : '') }, [
 				E('a', { 'href': L.url(url, child.name) }, [ _(child.title) ])
 			]));
-
 			if (isActive)
 				activeNode = child;
 		});
@@ -129,10 +144,8 @@ return baseclass.extend({
 
 		container.appendChild(ul);
 		container.style.display = '';
-
 		if (activeNode)
 			this.renderTabMenu(activeNode, url + '/' + activeNode.name, (level || 0) + 1);
-
 		return ul;
 	},
 
@@ -205,11 +218,9 @@ return baseclass.extend({
 		const children = ui.menu.getChildren(tree);
 		children.forEach((child, index) => {
 			const isActive = L.env.requestpath.length ? child.name === L.env.requestpath[0] : index === 0;
-
 			ul.appendChild(E('li', { 'class': isActive ? 'active' : '' }, [
 				E('a', { 'href': L.url(child.name) }, [ _(child.title) ])
 			]));
-
 			if (isActive)
 				this.renderMainMenu(child, child.name);
 		});

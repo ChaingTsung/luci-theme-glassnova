@@ -968,3 +968,143 @@ body.gn-login form.gn-auth-form.gn-login-card input[type="submit"], body.gn-logi
 .gn-dropdown-menu a:hover, .gn-submenu-vertical a:hover, .gn-dropdown-menu button:hover, .gn-submenu-vertical button:hover { background:hsl(var(--p) / .10)!important; color:hsl(var(--bc))!important; }
 .gn-submenu-vertical { display:block!important; position:static!important; min-width:0!important; max-height:none!important; overflow:visible!important; padding:.25rem 0 .25rem .9rem!important; margin:.15rem 0 .25rem .45rem!important; border:0!important; border-left:1px solid hsl(var(--bc) / .12)!important; border-radius:0!important; background:transparent!important; box-shadow:none!important; list-style:none!important; }
 @media (max-width:700px){ .gn-theme-select{top:auto; right:.75rem; bottom:.75rem;} .gn-dropdown-menu{width:calc(100vw - 1rem)!important; min-width:calc(100vw - 1rem)!important;} .gn-menu-label{display:none;} }
+
+/* GlassNova 2.4.0 menu stability and toast-safe layout. */
+.gn-topbar {
+  display: grid !important;
+  grid-template-columns: auto minmax(0, 1fr) auto !important;
+  align-items: center !important;
+  column-gap: .75rem !important;
+  row-gap: .55rem !important;
+  overflow: visible !important;
+  z-index: 600 !important;
+}
+.gn-brand { grid-column: 1; min-width: max-content !important; }
+.gn-main-menu, ul#topmenu.gn-menu-root {
+  grid-column: 2 !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  overflow-x: auto !important;
+  overflow-y: visible !important;
+  gap: .35rem !important;
+  padding: .25rem !important;
+  scrollbar-width: thin !important;
+  white-space: nowrap !important;
+}
+.gn-mode-menu, ul#modemenu.gn-mode-root {
+  grid-column: 3 !important;
+  min-width: max-content !important;
+  max-width: min(32vw, 28rem) !important;
+  overflow-x: auto !important;
+  overflow-y: visible !important;
+  flex-wrap: nowrap !important;
+  margin-left: 0 !important;
+  scrollbar-width: thin !important;
+}
+.gn-topbar .nav > li,
+.gn-menu-root > li,
+.gn-mode-root > li { position: relative !important; flex: 0 0 auto !important; }
+.gn-topbar .nav a,
+.gn-topbar .nav button.gn-menu-toggle,
+.gn-menu-root > li > a,
+.gn-menu-root > li > button.gn-menu-toggle {
+  max-width: 12rem !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+.gn-topbar .dropdown:hover > .gn-dropdown-menu,
+.gn-topbar .dropdown:focus-within > .gn-dropdown-menu,
+.gn-topbar .dropdown:not(.open):hover > .gn-dropdown-menu,
+.gn-topbar .dropdown:not(.open):focus-within > .gn-dropdown-menu {
+  display: none !important;
+}
+.gn-topbar .dropdown.open > .gn-dropdown-menu {
+  display: block !important;
+  pointer-events: auto !important;
+}
+.gn-dropdown-menu {
+  position: fixed !important;
+  z-index: 5000 !important;
+  display: none !important;
+  width: min(26rem, calc(100vw - 1.5rem)) !important;
+  min-width: min(26rem, calc(100vw - 1.5rem)) !important;
+  max-width: calc(100vw - 1.5rem) !important;
+  max-height: calc(100vh - 7rem) !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  overscroll-behavior: contain !important;
+  touch-action: pan-y !important;
+  padding: .65rem !important;
+  margin: 0 !important;
+  border-radius: 1.15rem !important;
+  border: 1px solid hsl(var(--bc) / .12) !important;
+  background: hsl(var(--b1) / .98) !important;
+  box-shadow: 0 26px 80px rgb(2 6 23 / .24) !important;
+  backdrop-filter: blur(22px) saturate(1.16) !important;
+  -webkit-backdrop-filter: blur(22px) saturate(1.16) !important;
+}
+.gn-dropdown-menu li,
+.gn-submenu-vertical li {
+  display: block !important;
+  position: static !important;
+  width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+.gn-dropdown-menu a,
+.gn-submenu-vertical a {
+  box-sizing: border-box !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  min-height: 2.25rem !important;
+  line-height: 1.35 !important;
+  white-space: normal !important;
+  word-break: break-word !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+}
+.gn-submenu-vertical {
+  display: block !important;
+  position: static !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  max-height: none !important;
+  overflow: visible !important;
+  padding: .25rem 0 .25rem .85rem !important;
+  margin: .15rem 0 .3rem .45rem !important;
+  border-left: 1px solid hsl(var(--bc) / .12) !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+.gn-toast-stack {
+  top: 6.25rem !important;
+  right: 1rem !important;
+  width: min(92vw, 360px) !important;
+  z-index: 3500 !important;
+}
+.gn-theme-toggle { z-index: 3200 !important; }
+.gn-theme-select { z-index: 3200 !important; }
+@media (max-width: 900px) {
+  .gn-topbar {
+    grid-template-columns: auto 1fr auto !important;
+    align-items: center !important;
+  }
+  .gn-brand { grid-column: 1 !important; }
+  .gn-mode-menu, ul#modemenu.gn-mode-root { grid-column: 3 !important; max-width: 36vw !important; width: auto !important; }
+  .gn-main-menu, ul#topmenu.gn-menu-root { grid-column: 1 / -1 !important; grid-row: 2 !important; width: 100% !important; }
+}
+@media (max-width: 700px) {
+  .gn-topbar { width: calc(100% - .6rem) !important; margin-top: .45rem !important; padding: .55rem !important; border-radius: 1rem !important; }
+  .gn-brand__mark { width: 2rem !important; height: 2rem !important; }
+  .gn-brand span:not(.gn-brand__mark) { max-width: 7.5rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .gn-mode-menu, ul#modemenu.gn-mode-root { max-width: 42vw !important; }
+  .gn-menu-label { display: inline !important; }
+  .gn-topbar .nav a, .gn-topbar .nav button.gn-menu-toggle { max-width: 9.25rem !important; padding-inline: .65rem !important; }
+  .gn-dropdown-menu { width: calc(100vw - 1rem) !important; min-width: calc(100vw - 1rem) !important; max-height: calc(100vh - 6rem) !important; }
+  .gn-toast-stack { top: auto !important; right: .75rem !important; left: .75rem !important; bottom: 4.75rem !important; width: auto !important; }
+  .gn-theme-select { bottom: .75rem !important; top: auto !important; right: .75rem !important; }
+}

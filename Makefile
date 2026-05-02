@@ -2,7 +2,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=luci-theme-glassnova
 PKG_VERSION:=2.2.0
-PKG_RELEASE:=1
+PKG_RELEASE:=2
 PKG_LICENSE:=Apache-2.0
 PKG_MAINTAINER:=GlassNova Maintainers
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)

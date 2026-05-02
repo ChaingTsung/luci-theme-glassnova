@@ -968,3 +968,5 @@ body.gn-login form.gn-auth-form.gn-login-card input[type="submit"], body.gn-logi
 .gn-dropdown-menu a:hover, .gn-submenu-vertical a:hover, .gn-dropdown-menu button:hover, .gn-submenu-vertical button:hover { background:hsl(var(--p) / .10)!important; color:hsl(var(--bc))!important; }
 .gn-submenu-vertical { display:block!important; position:static!important; min-width:0!important; max-height:none!important; overflow:visible!important; padding:.25rem 0 .25rem .9rem!important; margin:.15rem 0 .25rem .45rem!important; border:0!important; border-left:1px solid hsl(var(--bc) / .12)!important; border-radius:0!important; background:transparent!important; box-shadow:none!important; list-style:none!important; }
 @media (max-width:700px){ .gn-theme-select{top:auto; right:.75rem; bottom:.75rem;} .gn-dropdown-menu{width:calc(100vw - 1rem)!important; min-width:calc(100vw - 1rem)!important;} .gn-menu-label{display:none;} }
+
+/* GlassNova 2.4.0 menu stability and toast-safe layout. See built asset for compiled override. */
