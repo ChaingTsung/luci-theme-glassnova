@@ -12,6 +12,7 @@ return baseclass.extend({
 		let node = tree;
 		let url = '';
 
+		this.prepareTopbar();
 		this.renderModeMenu(tree);
 
 		if (L.env.dispatchpath.length >= 3) {
@@ -19,7 +20,6 @@ return baseclass.extend({
 				node = node.children[L.env.dispatchpath[i]];
 				url = url + (url ? '/' : '') + L.env.dispatchpath[i];
 			}
-
 			if (node)
 				this.renderTabMenu(node, url);
 		}
@@ -27,24 +27,82 @@ return baseclass.extend({
 		this.installGlobalMenuHandlers();
 	},
 
+	prepareTopbar() {
+		const topbar = document.querySelector('.gn-topbar');
+		const topmenu = document.querySelector('#topmenu');
+		if (!topbar || !topmenu)
+			return;
+
+		let nav = topbar.querySelector('.gn-main-nav');
+		if (!nav) {
+			nav = E('nav', {
+				'class': 'gn-main-nav',
+				'aria-label': _('Main navigation')
+			});
+			topmenu.parentNode.insertBefore(nav, topmenu);
+			nav.appendChild(topmenu);
+		}
+
+		if (!document.querySelector('.gn-nav-toggle')) {
+			const button = E('button', {
+				'class': 'gn-nav-toggle',
+				'type': 'button',
+				'aria-expanded': 'false',
+				'aria-controls': 'topmenu'
+			}, [ E('span', { 'aria-hidden': 'true' }, [ '☰' ]), E('span', {}, [ _('Menu') ]) ]);
+
+			button.addEventListener('click', ev => {
+				ev.preventDefault();
+				ev.stopPropagation();
+				const open = !document.body.classList.contains('gn-nav-open');
+				document.body.classList.toggle('gn-nav-open', open);
+				button.setAttribute('aria-expanded', open ? 'true' : 'false');
+				if (open)
+					this.closeOpenMenus();
+			});
+
+			topbar.insertBefore(button, topmenu);
+		}
+
+		if (!document.querySelector('.gn-nav-backdrop')) {
+			const backdrop = E('div', { 'class': 'gn-nav-backdrop', 'aria-hidden': 'true' });
+			backdrop.addEventListener('click', () => this.closeMobileDrawer());
+			document.body.appendChild(backdrop);
+		}
+	},
+
+	closeMobileDrawer() {
+		document.body.classList.remove('gn-nav-open');
+		const toggle = document.querySelector('.gn-nav-toggle');
+		if (toggle)
+			toggle.setAttribute('aria-expanded', 'false');
+	},
+
 	installGlobalMenuHandlers() {
 		if (document.body.dataset.gnMenuHandlers === '1')
 			return;
-
 		document.body.dataset.gnMenuHandlers = '1';
 
 		document.addEventListener('click', ev => {
-			if (ev.target instanceof Element && ev.target.closest('.gn-topbar .dropdown, .gn-dropdown-menu'))
+			if (ev.target instanceof Element && ev.target.closest('.gn-topbar .dropdown, .gn-dropdown-menu, .gn-nav-toggle, .gn-theme-select'))
 				return;
 			this.closeOpenMenus();
+			if (!(ev.target instanceof Element && ev.target.closest('#topmenu')))
+				this.closeMobileDrawer();
 		}, true);
 
 		document.addEventListener('keydown', ev => {
-			if (ev.key === 'Escape')
+			if (ev.key === 'Escape') {
 				this.closeOpenMenus();
+				this.closeMobileDrawer();
+			}
 		});
 
-		window.addEventListener('resize', () => this.repositionOpenMenus(), { passive: true });
+		window.addEventListener('resize', () => {
+			this.closeOpenMenus();
+			if (window.innerWidth > 640)
+				this.closeMobileDrawer();
+		}, { passive: true });
 	},
 
 	closeOpenMenus() {
@@ -64,25 +122,22 @@ return baseclass.extend({
 		});
 	},
 
-	repositionOpenMenus() {
-		document.querySelectorAll('.gn-topbar .dropdown.open').forEach(el => {
-			const toggle = el.querySelector('.gn-menu-toggle');
-			const menu = el.querySelector('.gn-dropdown-menu');
-			if (toggle && menu)
-				this.placeDropdown(toggle, menu);
-		});
-	},
-
 	placeDropdown(toggle, menu) {
 		const rect = toggle.getBoundingClientRect();
 		const margin = 12;
 		const vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
 		const vh = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0);
-		const isMobile = vw <= 760;
-		const width = isMobile ? (vw - margin * 2) : Math.min(420, vw - margin * 2);
-		const left = isMobile ? margin : Math.max(margin, Math.min(rect.left, vw - width - margin));
-		const top = Math.min(rect.bottom + 10, vh - margin - 220);
+		const isColumns = menu.classList.contains('gn-dropdown-menu--columns');
+		const isThreeCols = menu.classList.contains('gn-dropdown-menu--columns-3');
+		const width = isThreeCols ? Math.min(980, vw - margin * 2) : (isColumns ? Math.min(760, vw - margin * 2) : Math.min(360, vw - margin * 2));
+		let left = rect.left;
+		if (left + width > vw - margin)
+			left = vw - width - margin;
+		left = Math.max(margin, left);
+		let top = rect.bottom + 8;
 		const maxHeight = Math.max(220, vh - top - margin);
+		if (top + 220 > vh - margin)
+			top = Math.max(margin, vh - 220 - margin);
 
 		menu.style.left = left + 'px';
 		menu.style.top = top + 'px';
@@ -90,14 +145,12 @@ return baseclass.extend({
 		menu.style.minWidth = width + 'px';
 		menu.style.maxHeight = maxHeight + 'px';
 	},
-
 	makeIcon(name) {
 		const ns = 'http://www.w3.org/2000/svg';
 		const svg = document.createElementNS(ns, 'svg');
 		svg.setAttribute('viewBox', '0 0 24 24');
 		svg.setAttribute('aria-hidden', 'true');
 		svg.setAttribute('focusable', 'false');
-
 		const n = String(name || '').toLowerCase();
 		let paths;
 		if (n.indexOf('system') >= 0)
@@ -125,23 +178,17 @@ return baseclass.extend({
 		const container = document.querySelector('#tabmenu');
 		if (!container)
 			return E([]);
-
 		const ul = E('ul', { 'class': 'tabs gn-tabs' });
 		const children = ui.menu.getChildren(tree);
 		let activeNode = null;
-
 		children.forEach(child => {
 			const isActive = (L.env.dispatchpath[3 + (level || 0)] == child.name);
-			ul.appendChild(E('li', { 'class': 'tabmenu-item-%s%s'.format(child.name, isActive ? ' active' : '') }, [
-				E('a', { 'href': L.url(url, child.name) }, [ _(child.title) ])
-			]));
+			ul.appendChild(E('li', { 'class': 'tabmenu-item-%s%s'.format(child.name, isActive ? ' active' : '') }, [ E('a', { 'href': L.url(url, child.name) }, [ _(child.title) ]) ]));
 			if (isActive)
 				activeNode = child;
 		});
-
 		if (ul.children.length == 0)
 			return E([]);
-
 		container.appendChild(ul);
 		container.style.display = '';
 		if (activeNode)
@@ -150,8 +197,16 @@ return baseclass.extend({
 	},
 
 	renderSubmenu(tree, url, depth) {
-		const ul = E('ul', { 'class': depth ? 'gn-submenu-vertical' : 'dropdown-menu gn-dropdown-menu gn-submenu-vertical' });
 		const children = ui.menu.getChildren(tree);
+		const ul = E('ul', { 'class': depth ? 'gn-submenu-vertical' : 'dropdown-menu gn-dropdown-menu gn-submenu-vertical' });
+
+		if (!depth) {
+			if (children.length >= 10)
+				ul.classList.add('gn-dropdown-menu--columns');
+			if (children.length >= 20)
+				ul.classList.add('gn-dropdown-menu--columns-3');
+			ul.dataset.count = String(children.length);
+		}
 
 		children.forEach(child => {
 			const nextUrl = url + '/' + child.name;
@@ -163,27 +218,20 @@ return baseclass.extend({
 				li.appendChild(nested);
 			ul.appendChild(li);
 		});
-
 		return ul;
 	},
-
 	renderMainMenu(tree, url) {
 		const ul = document.querySelector('#topmenu');
 		if (!ul)
 			return E([]);
-
 		ul.classList.add('menu', 'menu-horizontal', 'gn-menu-root');
-		const children = ui.menu.getChildren(tree);
-		children.forEach(child => {
+		ui.menu.getChildren(tree).forEach(child => {
 			const nextUrl = url + '/' + child.name;
 			const submenu = this.renderSubmenu(child, nextUrl, 0);
 			const hasSubmenu = !!submenu.firstElementChild;
 			const li = E('li', { 'class': hasSubmenu ? 'dropdown' : '' });
-
 			if (hasSubmenu) {
-				const toggle = E('button', { 'class': 'gn-menu-toggle', 'type': 'button', 'aria-expanded': 'false' }, [
-					this.makeIcon(child.name), E('span', { 'class': 'gn-menu-label' }, [ _(child.title) ])
-				]);
+				const toggle = E('button', { 'class': 'gn-menu-toggle', 'type': 'button', 'aria-expanded': 'false' }, [ this.makeIcon(child.name), E('span', { 'class': 'gn-menu-label' }, [ _(child.title) ]), E('span', { 'class': 'gn-menu-chevron', 'aria-hidden': 'true' }, [ '▾' ]) ]);
 				toggle.addEventListener('click', ev => {
 					ev.preventDefault();
 					ev.stopPropagation();
@@ -198,13 +246,10 @@ return baseclass.extend({
 				li.appendChild(toggle);
 				li.appendChild(submenu);
 			} else {
-				li.appendChild(E('a', { 'href': L.url(nextUrl) }, [
-					this.makeIcon(child.name), E('span', { 'class': 'gn-menu-label' }, [ _(child.title) ])
-				]));
+				li.appendChild(E('a', { 'href': L.url(nextUrl) }, [ this.makeIcon(child.name), E('span', { 'class': 'gn-menu-label' }, [ _(child.title) ]) ]));
 			}
 			ul.appendChild(li);
 		});
-
 		ul.style.display = '';
 		return ul;
 	},
@@ -213,18 +258,13 @@ return baseclass.extend({
 		const ul = document.querySelector('#modemenu');
 		if (!ul)
 			return;
-
 		ul.classList.add('menu', 'menu-horizontal', 'gn-mode-root');
-		const children = ui.menu.getChildren(tree);
-		children.forEach((child, index) => {
+		ui.menu.getChildren(tree).forEach((child, index) => {
 			const isActive = L.env.requestpath.length ? child.name === L.env.requestpath[0] : index === 0;
-			ul.appendChild(E('li', { 'class': isActive ? 'active' : '' }, [
-				E('a', { 'href': L.url(child.name) }, [ _(child.title) ])
-			]));
+			ul.appendChild(E('li', { 'class': isActive ? 'active' : '' }, [ E('a', { 'href': L.url(child.name) }, [ _(child.title) ]) ]));
 			if (isActive)
 				this.renderMainMenu(child, child.name);
 		});
-
 		if (ul.children.length > 1)
 			ul.style.display = '';
 	}
