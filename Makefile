@@ -1,7 +1,7 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=luci-theme-glassnova
-PKG_VERSION:=2.11.0
+PKG_VERSION:=2.12.0
 PKG_RELEASE:=1
 PKG_LICENSE:=Apache-2.0
 PKG_MAINTAINER:=GlassNova Maintainers
@@ -19,11 +19,8 @@ define Package/luci-theme-glassnova
 endef
 
 define Package/luci-theme-glassnova/description
-GlassNova is a modern glassmorphism LuCI theme with responsive layout,
-light/dark mode switching, configurable login media background, frosted-glass
-login card, stacked notifications, and spring-like animations. This package is
-web-server neutral and does not select uhttpd. For nginx deployments, install
-and configure luci-nginx, nginx-mod-luci and uwsgi-luci-support separately.
+GlassNova is a modern glassmorphism LuCI theme for OpenWrt 25.12+.
+This fixed build restores the LuCI top menu and normalizes login/form radius to 5px.
 endef
 
 define Build/Prepare

@@ -1,16 +1,8 @@
 #!/bin/sh
 set -eu
-
-if [ $# -lt 1 ]; then
-  echo "Usage: $0 /path/to/openwrt" >&2
-  exit 1
-fi
-
-OPENWRT="$1"
-DEST="$OPENWRT/package/luci-theme-glassnova"
-mkdir -p "$(dirname "$DEST")"
-rm -rf "$DEST"
-cp -R "$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)" "$DEST"
-echo "Installed to $DEST"
-echo "Run: rm -rf tmp && make defconfig && make menuconfig"
-echo "Menu path: LuCI -> 4. Themes -> luci-theme-glassnova"
+[ $# -eq 1 ] || { echo "Usage: $0 /path/to/openwrt" >&2; exit 1; }
+dst="$1/package/luci-theme-glassnova"
+rm -rf "$dst"
+mkdir -p "$(dirname "$dst")"
+cp -a "$(dirname "$0")/.." "$dst"
+echo "Installed to $dst"

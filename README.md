@@ -1,150 +1,30 @@
-# luci-theme-glassnova
+# luci-theme-glassnova fixed
 
-GlassNova is a modern LuCI theme for OpenWrt 25.12+ style LuCI ucode templates. It is built as a static asset package with Vite 7, Tailwind CSS v4 and pnpm.
+基于 ChaingTsung/luci-theme-glassnova 修改的 OpenWrt 25.12+ LuCI ucode 主题源码包。
 
-## Important packaging note
+## 本版修复
 
-This archive is the **portable OpenWrt package variant**. It is intended to be copied directly into:
+1. 登录后顶部菜单不显示：移除 `header.ut` 中额外的 `#modemenu`，并重写 `menu-glassnova.js`，直接从 LuCI menu tree 渲染 `#topmenu`。
+2. 登录表单圆角过大：追加 CSS 覆盖，登录卡片、输入框、按钮、选择器统一为 `5px`。
+3. 静态构建产物已同步到 `htdocs/luci-static/glassnova/assets/`，可直接放入 OpenWrt 源码树编译。
 
-```sh
-package/luci-theme-glassnova
-```
-
-The default `Makefile` uses the normal OpenWrt `package.mk` interface, so it can be discovered by `make menuconfig` without relying on the relative `../../luci.mk` path used inside the LuCI feed.
-
-A LuCI-feed Makefile is still provided as `Makefile.luci-feed`. Use it only when placing the package under:
+## 编译
 
 ```sh
-feeds/luci/themes/luci-theme-glassnova
-```
-
-## nginx / uwsgi profile
-
-The theme package is web-server neutral:
-
-- it does **not** depend on `uhttpd`
-- it does **not** directly depend on `luci-base`
-- it directly depends on `luci-compat`, `rpcd` and `ucode-mod-uci`
-
-For nginx LuCI runtime, install/select the nginx LuCI stack separately, for example `luci-nginx` or the equivalent packages for your tree: `nginx`, `nginx-mod-luci`, `uwsgi-luci-support`.
-
-> LuCI itself normally requires its core runtime in the final image. This package avoids a direct `+luci-base` dependency as requested, but your selected LuCI collection/runtime may still pull core LuCI packages transitively.
-
-## Install into OpenWrt source tree
-
-Recommended direct package mode:
-
-```sh
-unzip luci-theme-glassnova-openwrt-selectable.zip
-cd luci-theme-glassnova
-./scripts/install-into-openwrt-package.sh /path/to/openwrt
+cp -a luci-theme-glassnova-fixed /path/to/openwrt/package/luci-theme-glassnova
 cd /path/to/openwrt
 rm -rf tmp
 make defconfig
-make menuconfig
-```
-
-Menu path:
-
-```text
-LuCI -> 4. Themes -> luci-theme-glassnova
-```
-
-Build only this package:
-
-```sh
-make package/luci-theme-glassnova/compile V=s
-```
-
-## Alternative: install into the LuCI feed
-
-```sh
-unzip luci-theme-glassnova-openwrt-selectable.zip
-cd luci-theme-glassnova
-./scripts/install-into-luci-feed.sh /path/to/openwrt
-cd /path/to/openwrt
-./scripts/feeds update luci
-./scripts/feeds install luci-theme-glassnova
-rm -rf tmp
-make defconfig
-make menuconfig
-```
-
-## If it still does not appear
-
-Run these checks from the OpenWrt root:
-
-```sh
-find package feeds -path '*/luci-theme-glassnova/Makefile' -print
 make package/luci-theme-glassnova/{clean,compile} V=s
-./scripts/feeds search luci-theme-glassnova || true
-grep -R "luci-theme-glassnova" tmp/.config-package.in tmp/info/.packageinfo 2>/dev/null || true
 ```
 
-Common causes:
-
-1. Package was placed under `package/luci-theme-glassnova/luci-theme-glassnova` due to an extra nested directory.
-2. Old `tmp/` metadata was not regenerated.
-3. Using the LuCI-feed `../../luci.mk` Makefile outside `feeds/luci/themes`.
-4. The tree does not have `luci-compat`; update/install the LuCI feed first.
-5. Custom forks rename the LuCI category or omit the LuCI feed entirely.
-
-## Runtime theme switch
-
-After installing the IPK:
+## 切换主题
 
 ```sh
 uci set luci.main.mediaurlbase='/luci-static/glassnova'
 uci commit luci
-/etc/init.d/nginx reload 2>/dev/null || true
-/etc/init.d/uwsgi reload 2>/dev/null || true
-```
-
-## Frontend development
-
-```sh
-pnpm install
-pnpm build
-```
-
-The Vite build writes deterministic LuCI asset names:
-
-```text
-htdocs/luci-static/glassnova/assets/glassnova.css
-htdocs/luci-static/glassnova/assets/glassnova.js
-```
-
-## Background media API
-
-The frontend accepts the following JSON shapes from self-hosted, Unsplash proxy, Pixiv proxy, X/Twitter proxy or any other API endpoint:
-
-```json
-{ "type": "image", "url": "https://example.com/bg.jpg" }
-```
-
-```json
-{ "type": "video", "url": "https://example.com/bg.mp4", "poster": "https://example.com/poster.jpg" }
-```
-
-```json
-{ "type": "youtube", "id": "dQw4w9WgXcQ" }
-```
-
-## Rescue / recovery
-
-If a broken theme prevents LuCI from rendering, SSH into the router and switch back to Bootstrap:
-
-```sh
-uci set luci.main.mediaurlbase='/luci-static/bootstrap'
-uci commit luci
 rm -rf /tmp/luci-*
 /etc/init.d/nginx restart 2>/dev/null || true
 /etc/init.d/uhttpd restart 2>/dev/null || true
+/etc/init.d/uwsgi restart 2>/dev/null || true
 ```
-
-For nginx + uwsgi deployments, restarting nginx is normally enough after clearing `/tmp/luci-*`.
-
-
-## 2.1 visual reference update
-
-This version adds a tasteful cyber-glass login scene inspired by marquee border login buttons and transparent-blur login panels, without bundling jQuery/Layui or copying external assets. It also suppresses root-password warnings on the login screen and improves long plugin dropdowns with scrolling and responsive grid layout.

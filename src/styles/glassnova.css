@@ -2425,3 +2425,33 @@ button:not(.gn-menu-toggle):not(.gn-nav-toggle) {
     margin-left: -.12rem !important;
   }
 }
+
+/* GlassNova fix: restore LuCI menu visibility and normalize login/form radius to 5px. */
+:root { --gn-radius-fix: 5px; }
+body.gn-login .gn-login-card,
+body.gn-login form.gn-auth-form.gn-login-card,
+body.gn-login .gn-login-card::before,
+body.gn-login .gn-login-card::after,
+body.gn-login .gn-login-card > h2,
+body.gn-login .gn-login-card > h3,
+body.gn-login .gn-login-card .cbi-map-title,
+body.gn-login .gn-login-title,
+body.gn-login .gn-auth-form input[type="text"],
+body.gn-login .gn-auth-form input[type="password"],
+body.gn-login .gn-auth-form select,
+body.gn-login .gn-auth-form textarea,
+body.gn-login .gn-runway-wrap,
+body.gn-login .gn-runway-wrap .gn-runway-button,
+body.gn-login .gn-runway-wrap input[type="submit"],
+body.gn-login .gn-runway-wrap button,
+input[type="text"], input[type="password"], input[type="search"], input[type="number"], select, textarea,
+.btn, .cbi-button, input[type="submit"], button, .gn-theme-toggle, .gn-theme-select {
+  border-radius: var(--gn-radius-fix) !important;
+}
+ul#topmenu.gn-menu-root,
+.gn-main-nav > ul#topmenu {
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+.gn-topbar { gap: .75rem; }

@@ -1,11 +1,6 @@
 include $(TOPDIR)/rules.mk
-
-LUCI_TITLE:=GlassNova Theme for nginx/uwsgi
-# Feed variant: use this only when the package is placed in feeds/luci/themes/luci-theme-glassnova.
-# Theme package itself remains web-server neutral; deploy nginx/uwsgi separately with luci-nginx.
+LUCI_TITLE:=GlassNova Theme
 LUCI_DEPENDS:=+luci-compat +rpcd +ucode-mod-uci
-PKG_LICENSE:=Apache-2.0
-PKG_MAINTAINER:=GlassNova Maintainers
-
+PKG_VERSION:=2.12.0
+PKG_RELEASE:=1
 include ../../luci.mk
-# call BuildPackage - OpenWrt buildroot signature

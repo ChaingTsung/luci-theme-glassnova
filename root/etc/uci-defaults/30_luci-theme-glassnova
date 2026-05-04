@@ -1,45 +1,6 @@
 #!/bin/sh
-changed=0
-
-set_opt() {
-	local key="$1"
-	local val="$2"
-	if ! uci -q get "luci.$key" >/dev/null 2>&1; then
-		uci set "luci.$key=$val"
-		changed=1
-	fi
-}
-
-set_glassnova_opt() {
-	local key="$1"
-	local val="$2"
-	if ! uci -q get "glassnova.main.$key" >/dev/null 2>&1; then
-		uci set "glassnova.main.$key=$val"
-		changed=1
-	fi
-}
-
-uci -q get glassnova.main >/dev/null 2>&1 || {
-	uci set glassnova.main='theme'
-	changed=1
-}
-
-set_opt themes.GlassNova /luci-static/glassnova
-set_glassnova_opt mode auto
-set_glassnova_opt provider local
-set_glassnova_opt local_url /luci-static/glassnova/media/default.svg
-set_glassnova_opt glass_alpha 0.56
-set_glassnova_opt glass_blur 22
-set_glassnova_opt title_alpha 0.42
-set_glassnova_opt reduce_motion 0
-
-if [ "$PKG_UPGRADE" != 1 ] && [ "$changed" = 1 ]; then
-	uci set luci.main.mediaurlbase=/luci-static/glassnova
-fi
-
-[ "$changed" = 1 ] && {
-	uci commit luci
-	uci commit glassnova
-}
-
+uci -q batch <<'UCI'
+set luci.themes.GlassNova='/luci-static/glassnova'
+commit luci
+UCI
 exit 0
